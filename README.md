@@ -15,8 +15,31 @@ Requirements
 Build the app
 -----
 
-```shell-session
+```shell
 $ dep ensure
 $ go build
 $ ./gghc
 ```
+
+Command structure
+-----
+
+```shell
+$ gghc [general options] <resource> <action> [action options]
+```
+
+Options
+-----
+
+- General
+    - u | user
+    - r | repo
+    - t | token
+
+Resources & Actions
+-----
+
+- labels
+    - list
+- milestones
+    - list
