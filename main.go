@@ -17,13 +17,8 @@ func main() {
 
 	flag.Parse()
 
-	// configuring github token
 	ctx := context.Background()
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: *token},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
+	client := initClient(ctx, *token)
 
 	args := flag.Args()
 
@@ -56,4 +51,14 @@ func main() {
 	}
 
 	os.Exit(0)
+}
+
+func initClient(ctx context.Context, token string) *github.Client {
+	// configuring github client by personal access token
+	// reference: <https://github.com/google/go-github#authentication>
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	return github.NewClient(tc)
 }
