@@ -11,14 +11,15 @@ import (
 )
 
 func main() {
+	token := os.Getenv("GGHC_GITHUB_TOKEN")
+
 	user := flag.String("user", "", "GitHub username")
 	repo := flag.String("repo", "", "Repository name")
-	token := flag.String("token", "", "Access token")
 
 	flag.Parse()
 
 	ctx := context.Background()
-	client := initClient(ctx, *token)
+	client := initClient(ctx, token)
 
 	args := flag.Args()
 
@@ -31,23 +32,12 @@ func main() {
 	action := args[1]
 	switch target {
 	case "labels":
-		if action != "list" {
-			fmt.Fprintln(os.Stderr, "Undefined action:", action)
-			os.Exit(1)
-		}
-		labels, _, err := client.Issues.ListLabels(ctx, *user, *repo, nil)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		for _, l := range labels {
-			fmt.Println("Label:", l.String())
-		}
+		labels(ctx, client, *user, *repo, action)
 	default:
 		fmt.Println("Option[user]:", *user)
 		fmt.Println("Option[repo]:", *repo)
-		fmt.Println("Option[token]:", *token)
 		fmt.Println("Target:", target)
+		fmt.Println("Action:", action)
 	}
 
 	os.Exit(0)
@@ -61,4 +51,19 @@ func initClient(ctx context.Context, token string) *github.Client {
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	return github.NewClient(tc)
+}
+
+func labels(ctx context.Context, client *github.Client, user string, repo string, action string) {
+	if action != "list" {
+		fmt.Fprintln(os.Stderr, "Unknow action:", action)
+		os.Exit(1)
+	}
+	labels, _, err := client.Issues.ListLabels(ctx, user, repo, nil)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	for _, l := range labels {
+		fmt.Println("Label:", l.String())
+	}
 }
