@@ -1,25 +1,34 @@
 package main
 
 import (
-	"os"
+	"flag"
 	"fmt"
+	"os"
+	// "github.com/golang/x/oauth2"
 	// "github.com/google/go-github/github"
 )
 
 func main() {
-	var cmd string
-	var opt []string
-	var err error
-	var args []string = os.Args
-
-	if cmd, opt, err = parseArgs(args); err != nil {
-		fmt.Fprintln(os.Stderr, "Error: %v", err)
+	if len(os.Args) < 2 {
+		fmt.Fprintln(os.Stderr, "this command requires at least one argument")
+		os.Exit(1)
 	}
-	fmt.Println("Command: %s", cmd)
-	fmt.Println("Options: %s", opt)
-}
 
-func parseArgs(args []string) (string, []string, error) {
-	subcmd, opt := args[1], args[2:]
-	return subcmd, opt, nil
+	user := flag.String("user", "", "GitHub username")
+	repo := flag.String("repo", "", "Repository name")
+	token := flag.String("token", "", "Access token")
+
+	flag.Parse()
+
+	args := flag.Args()
+
+	target := args[0]
+
+	switch target {
+	default:
+		fmt.Println("Option[user]:", *user)
+		fmt.Println("Option[repo]:", *repo)
+		fmt.Println("Option[token]:", *token)
+		fmt.Println("Target:", target)
+	}
 }
