@@ -11,6 +11,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	DEFAULT_PERPAGE = 30
+)
+
 func main() {
 	token := os.Getenv("GGHC_GITHUB_TOKEN")
 
@@ -57,12 +61,26 @@ func labels(ctx context.Context, client *github.Client, user string, repo string
 		fmt.Fprintln(os.Stderr, "Unknow action:", action)
 		os.Exit(1)
 	}
-	labels, _, err := client.Issues.ListLabels(ctx, user, repo, nil)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	labels := make([]*github.Label, 0, DEFAULT_PERPAGE)
+	opt := github.ListOptions{PerPage: DEFAULT_PERPAGE}
+
+	for {
+		ls, resp, err := client.Issues.ListLabels(ctx, user, repo, &opt)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		labels = append(labels, ls...)
+		opt.Page = resp.NextPage
+		fmt.Println("NextPage:", resp.NextPage)
+		fmt.Println("LastPage:", resp.LastPage)
+		if resp.NextPage == 0 {
+			break
+		}
 	}
+
+	fmt.Println("You've got", len(labels), "labels")
 	for _, l := range labels {
-		fmt.Println("Label:", l.String())
+		fmt.Println("Label:", *(l.Name))
 	}
 }
