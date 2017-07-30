@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -15,9 +16,18 @@ const (
 	DEFAULT_PERPAGE = 30
 )
 
+const (
+	EXIT_OK = 0
+	EXIT_ERROR
+)
+
 var client *github.Client
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	token := os.Getenv("GGHC_GITHUB_TOKEN")
 
 	user := flag.String("user", "", "GitHub username")
@@ -27,7 +37,7 @@ func main() {
 	args := flag.Args()
 	if len(args) < 2 {
 		fmt.Fprintf(os.Stderr, "usage: %s <resource> <action>\n", os.Args[0])
-		os.Exit(1)
+		return EXIT_ERROR
 	}
 	target := args[0]
 	action := args[1]
@@ -37,15 +47,17 @@ func main() {
 
 	switch target {
 	case "labels":
-		labels(ctx, *user, *repo, action)
+		err := labels(ctx, *user, *repo, action)
+		if err != nil {
+			return EXIT_ERROR
+		}
 	default:
 		fmt.Println("Option[user]:", *user)
 		fmt.Println("Option[repo]:", *repo)
 		fmt.Println("Target:", target)
 		fmt.Println("Action:", action)
 	}
-
-	os.Exit(0)
+	return EXIT_OK
 }
 
 func newGitHubClient(ctx context.Context, token string) *github.Client {
@@ -58,27 +70,31 @@ func newGitHubClient(ctx context.Context, token string) *github.Client {
 	return github.NewClient(tc)
 }
 
-func labels(ctx context.Context, user string, repo string, action string) {
+func labels(ctx context.Context, user string, repo string, action string) error {
 	if action != "list" {
 		fmt.Fprintln(os.Stderr, "Unknow action:", action)
-		os.Exit(1)
+		return errors.New("Unknow action given")
 	}
-	labels := getAllLabels(ctx, user, repo)
+	labels, err := getAllLabels(ctx, user, repo)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("You've got", len(labels), "labels")
 	for _, l := range labels {
 		fmt.Println("Label:", *(l.Name))
 	}
+	return nil
 }
 
-func getAllLabels(ctx context.Context, user string, repo string) []github.Label {
+func getAllLabels(ctx context.Context, user string, repo string) ([]github.Label, error) {
 	allp := make([]*github.Label, 0, DEFAULT_PERPAGE)
 	opt := github.ListOptions{PerPage: DEFAULT_PERPAGE}
 	for {
 		labels, resp, err := client.Issues.ListLabels(ctx, user, repo, &opt)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			return nil, err
 		}
 		allp = append(allp, labels...)
 		opt.Page = resp.NextPage
@@ -95,5 +111,5 @@ func getAllLabels(ctx context.Context, user string, repo string) []github.Label 
 	for _, label := range allp {
 		labels = append(labels, *label)
 	}
-	return labels
+	return labels, nil
 }
