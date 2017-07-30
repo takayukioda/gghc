@@ -15,6 +15,8 @@ const (
 	DEFAULT_PERPAGE = 30
 )
 
+var client *github.Client
+
 func main() {
 	token := os.Getenv("GGHC_GITHUB_TOKEN")
 
@@ -31,11 +33,11 @@ func main() {
 	action := args[1]
 
 	ctx := context.Background()
-	client := newGitHubClient(ctx, token)
+	client = newGitHubClient(ctx, token)
 
 	switch target {
 	case "labels":
-		labels(ctx, client, *user, *repo, action)
+		labels(ctx, *user, *repo, action)
 	default:
 		fmt.Println("Option[user]:", *user)
 		fmt.Println("Option[repo]:", *repo)
@@ -56,7 +58,7 @@ func newGitHubClient(ctx context.Context, token string) *github.Client {
 	return github.NewClient(tc)
 }
 
-func labels(ctx context.Context, client *github.Client, user string, repo string, action string) {
+func labels(ctx context.Context, user string, repo string, action string) {
 	if action != "list" {
 		fmt.Fprintln(os.Stderr, "Unknow action:", action)
 		os.Exit(1)
