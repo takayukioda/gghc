@@ -16,21 +16,19 @@ func main() {
 
 	user := flag.String("user", "", "GitHub username")
 	repo := flag.String("repo", "", "Repository name")
-
 	flag.Parse()
 
-	ctx := context.Background()
-	client := initClient(ctx, token)
-
 	args := flag.Args()
-
 	if len(args) < 2 {
 		fmt.Fprintf(os.Stderr, "usage: %s <resource> <action>\n", os.Args[0])
 		os.Exit(1)
 	}
-
 	target := args[0]
 	action := args[1]
+
+	ctx := context.Background()
+	client := newGitHubClient(ctx, token)
+
 	switch target {
 	case "labels":
 		labels(ctx, client, *user, *repo, action)
@@ -44,7 +42,7 @@ func main() {
 	os.Exit(0)
 }
 
-func initClient(ctx context.Context, token string) *github.Client {
+func newGitHubClient(ctx context.Context, token string) *github.Client {
 	// configuring github client by personal access token
 	// reference: <https://github.com/google/go-github#authentication>
 	ts := oauth2.StaticTokenSource(
