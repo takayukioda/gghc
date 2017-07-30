@@ -63,26 +63,37 @@ func labels(ctx context.Context, user string, repo string, action string) {
 		fmt.Fprintln(os.Stderr, "Unknow action:", action)
 		os.Exit(1)
 	}
-	labels := make([]*github.Label, 0, DEFAULT_PERPAGE)
-	opt := github.ListOptions{PerPage: DEFAULT_PERPAGE}
-
-	for {
-		ls, resp, err := client.Issues.ListLabels(ctx, user, repo, &opt)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		labels = append(labels, ls...)
-		opt.Page = resp.NextPage
-		fmt.Println("NextPage:", resp.NextPage)
-		fmt.Println("LastPage:", resp.LastPage)
-		if resp.NextPage == 0 {
-			break
-		}
-	}
+	labels := getAllLabels(ctx, user, repo)
 
 	fmt.Println("You've got", len(labels), "labels")
 	for _, l := range labels {
 		fmt.Println("Label:", *(l.Name))
 	}
+}
+
+func getAllLabels(ctx context.Context, user string, repo string) []github.Label {
+	allp := make([]*github.Label, 0, DEFAULT_PERPAGE)
+	opt := github.ListOptions{PerPage: DEFAULT_PERPAGE}
+	for {
+		labels, resp, err := client.Issues.ListLabels(ctx, user, repo, &opt)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		allp = append(allp, labels...)
+		opt.Page = resp.NextPage
+
+		// When there's no next page, GitHub omits next page information <https://developer.github.com/v3/#pagination>
+		// go-github resolves omitted information by setting with zero
+		// <https://github.com/google/go-github/blob/35d38108ba83757e9b6fc00e4ba7e2d597c651be/github/github.go#L297-L314>
+		if resp.NextPage == 0 {
+			break
+		}
+	}
+
+	labels := make([]github.Label, 0, len(allp))
+	for _, label := range allp {
+		labels = append(labels, *label)
+	}
+	return labels
 }
