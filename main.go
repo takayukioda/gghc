@@ -13,12 +13,12 @@ import (
 )
 
 const (
-	DEFAULT_PERPAGE = 30
+	DefaultPerPage = 30
 )
 
 const (
-	EXIT_OK = 0
-	EXIT_ERROR
+	ExitOk = 0
+	ExitError
 )
 
 var client *github.Client
@@ -37,7 +37,7 @@ func run() int {
 	args := flag.Args()
 	if len(args) < 2 {
 		fmt.Fprintf(os.Stderr, "usage: %s <resource> <action>\n", os.Args[0])
-		return EXIT_ERROR
+		return ExitError
 	}
 	target := args[0]
 	action := args[1]
@@ -49,7 +49,7 @@ func run() int {
 	case "labels":
 		err := labels(ctx, *user, *repo, action)
 		if err != nil {
-			return EXIT_ERROR
+			return ExitError
 		}
 	default:
 		fmt.Println("Option[user]:", *user)
@@ -57,7 +57,7 @@ func run() int {
 		fmt.Println("Target:", target)
 		fmt.Println("Action:", action)
 	}
-	return EXIT_OK
+	return ExitOk
 }
 
 func newGitHubClient(ctx context.Context, token string) *github.Client {
@@ -88,8 +88,8 @@ func labels(ctx context.Context, user string, repo string, action string) error 
 }
 
 func getAllLabels(ctx context.Context, user string, repo string) ([]github.Label, error) {
-	allp := make([]*github.Label, 0, DEFAULT_PERPAGE)
-	opt := github.ListOptions{PerPage: DEFAULT_PERPAGE}
+	allp := make([]*github.Label, 0, DefaultPerPage)
+	opt := github.ListOptions{PerPage: DefaultPerPage}
 	for {
 		labels, resp, err := client.Issues.ListLabels(ctx, user, repo, &opt)
 		if err != nil {
