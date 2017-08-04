@@ -1,0 +1,6 @@
+- name: vet and lint
+  steps:
+    - service: fortest
+      command: go vet $(find . -name '*.go' | grep -v vendor)
+    - service: fortest
+      command: golint $(find . -name '*.go' | grep -v vendor)

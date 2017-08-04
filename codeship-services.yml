@@ -2,4 +2,4 @@ version: '2'
 
 services:
   fortest:
-    image: golang:1.8-alpine
+    builde: .
