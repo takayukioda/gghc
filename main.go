@@ -13,13 +13,14 @@ import (
 )
 
 const (
-	// default values
+	// DefaultPerPage is GitHub's default pager value
 	DefaultPerPage = 30
 )
 
 const (
-	// exit code
+	// ExitOk returns when application ends without any errors
 	ExitOk = 0
+	// ExitError is used when ever there were error in application
 	ExitError
 )
 
