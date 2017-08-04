@@ -13,10 +13,12 @@ import (
 )
 
 const (
+	// default values
 	DefaultPerPage = 30
 )
 
 const (
+	// exit code
 	ExitOk = 0
 	ExitError
 )
