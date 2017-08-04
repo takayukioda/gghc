@@ -2,4 +2,4 @@ version: '2'
 
 services:
   fortest:
-    builde: .
+    build: .
