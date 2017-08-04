@@ -1,5 +1,7 @@
 version: '2'
 
 services:
-  fortest:
-    build: .
+  go-ghc:
+    build:
+      image: golang:1.8-alpine
+      dockerfile: Dockerfile

@@ -1,12 +1,16 @@
 FROM golang:1.8-alpine
 
-RUN apk update && \
+# GOPATH configured in golang image is `/go`
+ENV PROJPATH=/go/src/go-ghc
+
+RUN set -eux; \
+	apk update && \
 	apk add git
 RUN go get github.com/golang/lint/golint
 
-RUN mkdir -p /project/app
-WORKDIR /project/app
+RUN mkdir -p $PROJPATH
+WORKDIR $PROJPATH
 
-COPY . .
+COPY . $PROJPATH
 
 CMD ["printenv"]

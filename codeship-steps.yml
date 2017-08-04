@@ -1,7 +1,7 @@
 - type: parallel
-  name: vet-and-lint
+  name: vet_and_lint
   steps:
-    - service: fortest
-      command: go vet `find . -name '*.go' | grep -v vendor`
-    - service: fortest
-      command: golint `find . -name '*.go' | grep -v vendor`
+    - service: go-ghc
+      command: sh -c "go vet `find . -name '*.go' | grep -v vendor`"
+    - service: go-ghc
+      command: sh -c "golint `find . -name '*.go' | grep -v vendor`"
