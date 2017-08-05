@@ -1,3 +1,5 @@
+# build binary (usually project name)
+go-ghc
 
 # Created by https://www.gitignore.io/api/go
 
