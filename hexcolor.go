@@ -45,3 +45,5 @@ func vchars(code string) bool {
 	return rhex.MatchString(code)
 }
 
+// ToDo: func (color *HexColor) ToFull() string
+// ToDo: func (color *HexColor) Compress() (string, error)
