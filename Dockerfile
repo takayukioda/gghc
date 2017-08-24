@@ -5,7 +5,7 @@ ENV PROJPATH=/go/src/go-ghc
 
 RUN set -eux; \
 	apk update && \
-	apk add git
+	apk add git make
 RUN go get github.com/golang/lint/golint
 
 RUN mkdir -p $PROJPATH
