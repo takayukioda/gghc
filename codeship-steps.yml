@@ -1,7 +1,3 @@
-- type: parallel
-  name: vet_and_lint
-  steps:
-    - service: go-ghc
-      command: sh -c "go vet `find . -name '*.go' | grep -v vendor`"
-    - service: go-ghc
-      command: sh -c "golint `find . -name '*.go' | grep -v vendor`"
+- name: linting
+  service: go-ghc
+  command: make lint
