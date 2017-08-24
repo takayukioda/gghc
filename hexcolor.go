@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -14,7 +15,11 @@ func NewHexColor(code string) HexColor {
 	return HexColor{code: strings.ToLower(code)}
 }
 
-func (color *HexColor) Verify() []error {
+func (color HexColor) GetCode() string {
+	return color.code
+}
+
+func (color HexColor) Verify() []error {
 	// Capacity set as 2 since there is only 2 possible errors
 	errs := make([]error, 0, 2)
 
@@ -31,6 +36,35 @@ func (color *HexColor) Verify() []error {
 	return nil
 }
 
+/**
+ * Returns full length color code
+ */
+func (color HexColor) ToFull() string {
+	if len(color.code) == 6 {
+		return color.code
+	}
+	rgb := strings.Split(color.code, "")
+	return fmt.Sprintf("%s%s%s%s%s%s", rgb[0], rgb[0], rgb[1], rgb[1], rgb[2], rgb[2])
+}
+
+/**
+ * Returns compressed color code
+ * color code must be in form of `rrggbb` which each r, g, b is repeated
+ * e.g. ff11aa
+ * fe11aa will return error with empty text
+ */
+func (color HexColor) Compress() (string, error) {
+	if len(color.code) == 3 {
+		return color.code, nil
+	}
+	rrggbb := strings.Split(color.code, "")
+
+	if rrggbb[0] != rrggbb[1] || rrggbb[2] != rrggbb[3] || rrggbb[4] != rrggbb[5] {
+		return "", errors.New("To compress, rgb have to have same value for each rgb")
+	}
+	return fmt.Sprintf("%s%s%s", rrggbb[0], rrggbb[2], rrggbb[4]), nil
+}
+
 // Verify length of color code
 // Length of code must be 3, shorten length, or 6
 func vlen(code string) bool {
@@ -44,6 +78,3 @@ func vchars(code string) bool {
 	var rhex *regexp.Regexp = regexp.MustCompile("^[0-9a-f]{3,6}$")
 	return rhex.MatchString(code)
 }
-
-// ToDo: func (color *HexColor) ToFull() string
-// ToDo: func (color *HexColor) Compress() (string, error)
