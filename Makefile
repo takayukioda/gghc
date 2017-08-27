@@ -20,6 +20,9 @@ lint: setup
 	go vet $(FILES)
 	golint $(FILES)
 
+test: setup lint
+	go test
+
 fmt:
 	go fmt $(FILES)
 
