@@ -1,73 +1,61 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
-func failure(it string, expected string, actual string) string {
-	return fmt.Sprintf("%s: expected to be %s, got %s", it, expected, actual)
-}
-
 func TestNew(t *testing.T) {
-	hex, lower := NewHexColor("aB1FE0"), "ab1fe0"
-	if hex.GetCode() != lower {
-		t.Fatal(failure("NewHexColor", lower, hex.GetCode()))
+	color, _ := NewHexColor("aB1FE0")
+	if color.GetCode() != "ab1fe0" {
+		t.Fatalf("NewHexColor: expected initialized code to be lower case, got %s",
+			color.GetCode())
 	}
 }
 
 func TestVerify(t *testing.T) {
-	hex3 := NewHexColor("012")
-	hex4 := NewHexColor("abcd")
-	hex6 := NewHexColor("987fed")
-	hex12 := NewHexColor("01ab23cd67ef")
-	nonhex := NewHexColor("0g9h1i")
-
-	if hex3.Verify() != nil {
-		t.Fatal("length 3, Verify: expected to be nil, got", hex3.Verify())
+	if _, errs := NewHexColor("012"); errs != nil {
+		t.Fatalf("Verify: 3-chars color code should succeed, got %s", errs)
 	}
-	if hex6.Verify() != nil {
-		t.Fatal("length 6, Verify: expected to be nil, got", hex6.Verify())
+	if _, errs := NewHexColor("987fed"); errs != nil {
+		t.Fatalf("Verify: 6-chars color code should succeed, got %s", errs)
 	}
-	if hex4.Verify() == nil {
-		t.Fatal("length 4, Verify: expected to be an error, got nil")
+	if color, errs := NewHexColor("abcd"); errs == nil {
+		t.Fatalf("Verify: 4-chars color code should fail, got %s", color)
 	}
-	if hex12.Verify() == nil {
-		t.Fatal("length 12, Verify: expected to be an error, got nil")
+	if color, errs := NewHexColor("01ab23cd67ef"); errs == nil {
+		t.Fatalf("Verify: 12-chars color code should fail, got %s", color)
 	}
-	if nonhex.Verify() == nil {
-		t.Fatal("non hex, Verify: expected to be an error, got nil")
+	if color, errs := NewHexColor("0g9h1i"); errs == nil {
+		t.Fatalf("Verify: code with non-hex character should fail, got %s", color)
 	}
 }
 
 func TestToFull(t *testing.T) {
-	hex3, hex3full := NewHexColor("f12"), "ff1122"
-	hex6 := NewHexColor("d97f8e")
-
-	if hex3.ToFull() != hex3full {
-		t.Fatal(failure("length 3, ToFull", hex3full, hex3.ToFull()))
+	if color, _ := NewHexColor("f12"); color.ToFull() != "ff1122" {
+		t.Fatalf("ToFull: 3-chars color code should be extened, got %s", color.ToFull())
 	}
-	if hex6.ToFull() != hex6.GetCode() {
-		t.Fatal(failure("length 3, ToFull", hex3full, hex3.ToFull()))
+	if color, _ := NewHexColor("d97f8e"); color.ToFull() != color.GetCode() {
+		t.Fatalf("ToFull: 6-chars color code should equals to original code, got %s",
+			color.ToFull())
 	}
 }
 
 func TestCompress(t *testing.T) {
-	hex3, hex3comp := NewHexColor("9a3"), "9a3"
-	hex6, hex6comp := NewHexColor("ee8833"), "e83"
-	hexe := NewHexColor("d97f8e")
+	var color *HexColor
+	var _ []error
 
-	if comp, err := hex3.Compress(); err != nil {
-		t.Fatal(hex3.GetCode(), "Compress(): should not be an error")
-	} else if comp != hex3comp {
-		t.Fatal(hex3.GetCode(), "Compress(): should equal to", hex3comp)
+	color, _ = NewHexColor("d97f8e")
+	if comp, err := color.Compress(); err == nil {
+		t.Fatalf("Compress: color code with non-supported format should fail, got %s", comp)
 	}
-	if comp, err := hex6.Compress(); err != nil {
-		t.Fatal(hex6.GetCode(), "Compress(): should not be an error")
-	} else if comp != hex6comp {
-		t.Fatal(hex6.GetCode(), "Compress(): should equal to", hex6comp)
+
+	color, _ = NewHexColor("9a3")
+	if comp, _ := color.Compress(); comp != color.GetCode() {
+		t.Fatalf("Compress: 6-chars color code should compressed, got %s", comp)
 	}
-	if _, err := hexe.Compress(); err == nil {
-		t.Fatal(hexe.GetCode(), "Compress(): should be an error")
+
+	color, _ = NewHexColor("ee8833")
+	if comp, _ := color.Compress(); comp != "e83" {
+		t.Fatalf("Compress: 3-chars color code should euqals to original code, got %s", comp)
 	}
 }

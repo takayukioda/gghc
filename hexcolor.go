@@ -11,35 +11,22 @@ type HexColor struct {
 	code string
 }
 
-func NewHexColor(code string) HexColor {
-	return HexColor{code: strings.ToLower(code)}
+func NewHexColor(code string) (*HexColor, []error) {
+	color := &HexColor{code: strings.ToLower(code)}
+	if errs := verify(color); errs != nil {
+		return nil, errs
+	}
+	return color, nil
 }
 
-func (color HexColor) GetCode() string {
+func (color *HexColor) GetCode() string {
 	return color.code
-}
-
-func (color HexColor) Verify() []error {
-	// Capacity set as 2 since there is only 2 possible errors
-	errs := make([]error, 0, 2)
-
-	if !vlen(color.code) {
-		errs = append(errs, errors.New("Invalid length of string is given"))
-	}
-	if !vchars(color.code) {
-		errs = append(errs, errors.New("Invalid character have found"))
-	}
-
-	if len(errs) > 0 {
-		return errs
-	}
-	return nil
 }
 
 /**
  * Returns full length color code
  */
-func (color HexColor) ToFull() string {
+func (color *HexColor) ToFull() string {
 	if len(color.code) == 6 {
 		return color.code
 	}
@@ -48,12 +35,12 @@ func (color HexColor) ToFull() string {
 }
 
 /**
- * Returns compressed color code
+ * Compress returns compressed color code
  * color code must be in form of `rrggbb` which each r, g, b is repeated
  * e.g. ff11aa
  * fe11aa will return error with empty text
  */
-func (color HexColor) Compress() (string, error) {
+func (color *HexColor) Compress() (string, error) {
 	if len(color.code) == 3 {
 		return color.code, nil
 	}
@@ -77,4 +64,21 @@ func vlen(code string) bool {
 func vchars(code string) bool {
 	var rhex *regexp.Regexp = regexp.MustCompile("^[0-9a-f]{3,6}$")
 	return rhex.MatchString(code)
+}
+
+func verify(color *HexColor) []error {
+	// Initialize slice with capacity of 2; there is only 2 possible errors
+	errs := make([]error, 0, 2)
+
+	if !vlen(color.code) {
+		errs = append(errs, errors.New("Invalid length of string is given"))
+	}
+	if !vchars(color.code) {
+		errs = append(errs, errors.New("Invalid character have found"))
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
+	return nil
 }
